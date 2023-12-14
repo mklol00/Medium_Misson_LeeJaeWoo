@@ -32,4 +32,9 @@ public class Rq {
 
 
     }
+
+    public String historyBack(String msg) {
+        request.setAttribute("failMsg",msg);
+        return "/global/js";
+    }
 }
