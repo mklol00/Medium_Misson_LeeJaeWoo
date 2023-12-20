@@ -17,10 +17,13 @@
     </script>
 </head>
 <body>
+
 <th:block layout:fragment="header"></th:block>
+
 <th:block layout:fragment="content"></th:block>
 
 <script>
+
     $(window).bind("pageshow", function (event) {
         if (sessionStorage.getItem("historyBackFailMsg")) {
             toastWarning(sessionStorage.getItem("historyBackFailMsg"));
