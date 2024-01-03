@@ -1,6 +1,7 @@
 package com.ll.medium.global.rq.Rq;
 
 import com.ll.medium.global.rsData.RsData.RsData;
+import com.ll.medium.standard.util.Ut.Ut;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.apache.catalina.util.URLEncoder;
@@ -76,5 +77,17 @@ public class Rq {
 
     public void setAttribute(String key,Object value){
         request.setAttribute(key,value);
+    }
+
+    public String getCurrentQueryStringWithoutParam(String paramName){
+        String queryString = request.getQueryString();
+
+        if(queryString == null){
+            return "";
+        }
+
+        queryString = Ut.url.deleteQueryParam(queryString, paramName);
+        return queryString;
+
     }
 }
