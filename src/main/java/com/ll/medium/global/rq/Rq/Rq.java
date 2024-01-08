@@ -27,6 +27,8 @@ public class Rq {
     private Member member;
 
     public String redirect(String url, String msg) {
+        String[] urlBits = url.split("#", 2);
+        url = urlBits[0];
         msg = URLEncoder.DEFAULT.encode(msg, StandardCharsets.UTF_8);
 
         StringBuilder sb = new StringBuilder();
@@ -37,6 +39,10 @@ public class Rq {
         if (msg != null) {
             sb.append("?msg=");
             sb.append(msg);
+        }
+        if (urlBits.length == 2) {
+            sb.append("#");
+            sb.append(urlBits[1]);
         }
 
         return sb.toString();
@@ -96,9 +102,9 @@ public class Rq {
     }
 
     public Member getMember() {
-        if ( isLogout() ) return null;
+        if (isLogout()) return null;
 
-        if ( member == null ) {
+        if (member == null) {
             member = entityManager.getReference(Member.class, getUser().getId());
         }
 
