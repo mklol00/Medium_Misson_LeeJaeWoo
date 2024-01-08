@@ -27,7 +27,7 @@ public class PostService {
                 .isPublished(isPublished)
                 .build();
 
-       return postRepository.save(post);
+        return postRepository.save(post);
 
     }
 
@@ -38,11 +38,23 @@ public class PostService {
     public Optional<Post> findById(long id) {
         return postRepository.findById(id);
     }
+
     public Page<Post> search(String kw, Pageable pageable) {
-        return postRepository.findByIsPublishedAndTitleContainingIgnoreCaseOrIsPublishedAndBodyContainingIgnoreCase(true, kw, true, kw, pageable);
+        return postRepository.search(true, kw, pageable);
     }
 
     public Page<Post> search(Member author, String kw, Pageable pageable) {
-        return postRepository.findByAuthorAndTitleContainingIgnoreCaseOrAuthorAndBodyContainingIgnoreCase(author, kw, author, kw, pageable);
+        return postRepository.search(author, kw, pageable);
+    }
+
+    public boolean canModify(Member actor, Post post) {
+        return actor.equals(post.getAuthor());
+    }
+
+    @Transactional
+    public void modify(Post post, String title, String body, boolean published) {
+        post.setTitle(title);
+        post.setBody(body);
+        post.setPublished(published);
     }
 }
