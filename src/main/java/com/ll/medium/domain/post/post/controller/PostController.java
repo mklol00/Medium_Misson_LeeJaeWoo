@@ -30,7 +30,12 @@ public class PostController {
 
     @GetMapping("/{id}")
     public String showDetail(@PathVariable long id) {
-        rq.setAttribute("post", postService.findById(id).get());
+        Post post = postService.findById(id).orElseThrow(() -> new GlobalException("404-1", "해당 글이 존재하지 않습니다."));
+
+        postService.increaseHit(post);
+
+        rq.setAttribute("post", post);
+
         return "domain/post/post/detail";
     }
 
@@ -42,11 +47,9 @@ public class PostController {
         List<Sort.Order> sorts = new ArrayList<>();
         sorts.add(Sort.Order.desc("id"));
         Pageable pageable = PageRequest.of(page - 1, 10, Sort.by(sorts));
-
         Page<Post> postPage = postService.search(kw, pageable);
         rq.setAttribute("postPage", postPage);
         rq.setAttribute("page", page);
-
         return "domain/post/post/list";
     }
 
@@ -59,14 +62,11 @@ public class PostController {
         List<Sort.Order> sorts = new ArrayList<>();
         sorts.add(Sort.Order.desc("id"));
         Pageable pageable = PageRequest.of(page - 1, 10, Sort.by(sorts));
-
-        Page<Post> postPage = postService.search(rq.getMember(), kw, pageable);
+        Page<Post> postPage = postService.search(rq.getMember(), null, kw, pageable);
         rq.setAttribute("postPage", postPage);
         rq.setAttribute("page", page);
-
-        return "domain/post/post/list";
+        return "domain/post/post/myList";
     }
-
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/write")
@@ -88,10 +88,8 @@ public class PostController {
     @PostMapping("/write")
     public String write(@Valid WriteForm form) {
         Post post = postService.write(rq.getMember(), form.getTitle(), form.getBody(), form.isPublished());
-
         return rq.redirect("/post/" + post.getId(), post.getId() + "번 글이 작성되었습니다.");
     }
-
 
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/{id}/modify")
@@ -117,8 +115,7 @@ public class PostController {
     public String modify(@PathVariable long id, @Valid ModifyForm form) {
         Post post = postService.findById(id).orElseThrow(() -> new GlobalException("404-1", "해당 글이 존재하지 않습니다."));
         if (!postService.canModify(rq.getMember(), post)) throw new GlobalException("403-1", "권한이 없습니다.");
-        postService.modify(post,form.getTitle(), form.getBody(), form.isPublished());
-
+        postService.modify(post, form.getTitle(), form.getBody(), form.isPublished());
         return rq.redirect("/post/" + post.getId(), post.getId() + "번 글이 수정되었습니다.");
     }
 
@@ -126,12 +123,8 @@ public class PostController {
     @DeleteMapping("/{id}/delete")
     public String delete(@PathVariable long id) {
         Post post = postService.findById(id).orElseThrow(() -> new GlobalException("404-1", "해당 글이 존재하지 않습니다."));
-
         if (!postService.canDelete(rq.getMember(), post)) throw new GlobalException("403-1", "권한이 없습니다.");
-
         postService.delete(post);
-
         return rq.redirect("/post/list", post.getId() + "번 글이 삭제되었습니다.");
     }
-
 }
